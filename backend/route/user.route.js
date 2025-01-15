@@ -51,38 +51,43 @@ userRouter.post("/register", async (req, res) => {
 userRouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  let user = await UserModel.find({ email });
   try {
-   
+    // Find the user by email
+    let user = await UserModel.find({ email });
 
+    // If user doesn't exist
     if (user.length < 1) {
-      res.status(200).send({ msg: "User Does Not Exists" });
-    } else {
-      bcrypt.compare(password, user[0].password, async (error, result) => {
-        if (error) {
-          res.status(200).send({ msg: error });
-        } else if (result === true) {
-
-          jswt.sign({ id: user[0]._id }, "janani", async (err, token) => {
-            if (err) {
-              res.status(200).send({ msg: error });
-            } else {
-              res.status(200).send({
-                msg: "User Logged In Successfully",
-                token,
-                name: user[0].name, // Include the user's name in the response
-              });
-            }
-          });
-        } else {
-          res.status(200).send({ msg: "Password Is Wrong" });
-        }
-      });
+      return res.status(404).send({ msg: "User Does Not Exist" });
     }
+
+    // Compare password using bcrypt
+    bcrypt.compare(password, user[0].password, async (error, result) => {
+      if (error) {
+        return res.status(500).send({ msg: "An error occurred while validating the password" });
+      } 
+      
+      if (result === true) {
+        // If password is correct, generate JWT token
+        jswt.sign({ id: user[0]._id }, "janani", async (err, token) => {
+          if (err) {
+            return res.status(500).send({ msg: "Error generating token" });
+          }
+          return res.status(200).send({
+            msg: "User Logged In Successfully",
+            token,
+            name: user[0].name, // Include the user's name in the response
+          });
+        });
+      } else {
+        return res.status(401).send({ msg: "Password Is Incorrect" });
+      }
+    });
   } catch (error) {
-    res.status(400).send({ msg: error.message });
+    // Handle server errors
+    return res.status(500).send({ msg: "Server Error", error: error.message });
   }
 });
+
 
 
 
