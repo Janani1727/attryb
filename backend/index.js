@@ -14,7 +14,7 @@ app.use(express.json())
 
 
 app.use(cors({
-    origin: "https://attrybfrontend-ipxxyylhw-janani1727s-projects.vercel.app/", // Replace with your frontend URL
+    origin: "*", 
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
   }));
