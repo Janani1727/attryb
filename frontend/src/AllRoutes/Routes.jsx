@@ -12,17 +12,17 @@ const AllRoutes = () => {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<MarketPlace />} /> {/* Public route for the marketplace */}
-
+      <Route path="/auth" element={<Authentication   />} />
       {/* Authentication route */}
-      <Route path="/auth" element={<Authentication setIsAuthenticated={setIsAuthenticated} />} /> {/* Only authentication */}
+      {/* <Route path="/auth" element={<Authentication setIsAuthenticated={setIsAuthenticated} />} /> Only authentication */}
 
       {/* Private routes */}
       <Route
         path="/oem"
         element={
-          <PrivateRoute isAuthenticated={isAuthenticated}>
+          // <PrivateRoute isAuthenticated={isAuthenticated}>
             <Oem />
-          </PrivateRoute>
+          // </PrivateRoute>
         }
       />
       

@@ -12,6 +12,7 @@ import {
   ModalCloseButton,
   useDisclosure,
   Input,
+  useToast,
 } from "@chakra-ui/react";
 import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +26,7 @@ const Oem = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [searchResults, setSearchResults] = useState([]);
-
+ const toast = useToast();
   const [formData, setFormData] = useState({
     image: "",
     title: "",
@@ -71,8 +72,20 @@ const Oem = () => {
       setSearchResults(filteredResults);
     }
   }, [searchQuery, oem]);
-
+  let user=localStorage.getItem("user");
+  console.log("user",user)
   const PostData = (oemId) => {
+    if (!user) {
+      toast({
+        title: "Please login to delete data.",
+        description: "You need to be logged in to delete data.",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
+
     axios
       .post("https://attryb-7m01.onrender.com/MarketplaceInventory/create", {
         ...formData,
@@ -176,6 +189,8 @@ const Oem = () => {
                     height: "40px",
                   }}
                   placeholder="search by model name"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
@@ -190,10 +205,10 @@ const Oem = () => {
               }}
             >
               {Array.isArray(oem) && oem.length > 0 ? (
-                oem.map((el, index) => (
+                oem.map((el) => (
                   <>
                     <div
-                      key={index}
+                      key={el._id}
                       onClick={onOpen}
                       style={{
                         border: "1px solid black",

@@ -16,7 +16,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import Navbar from '../components/Navbar';
 
-export default function Authentication({ setIsAuthenticated }) {
+export default function Authentication() {
   const [isSignup, setIsSignup] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -35,10 +35,10 @@ export default function Authentication({ setIsAuthenticated }) {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
-      setIsAuthenticated(true);
+     
       navigate("/oem");
     }
-  }, [setIsAuthenticated, navigate]);
+  }, [ navigate]);
 
   
   
@@ -57,19 +57,10 @@ export default function Authentication({ setIsAuthenticated }) {
 
         console.log(response.data);
   
-      
-        if (response.data.msg === "User Does Not Exist") {
-          alert("User not found. Please register first.");
-          return; // Stop the login process if the user doesn't exist
-        } else if (response.data.msg === "Password Is Incorrect") {
-          alert("Incorrect password. Please try again.");
-          return;
-        }
-  
+   
         const username = response.data.name; 
         localStorage.setItem("user", JSON.stringify(response.data)); 
         setUser(username); 
-        setIsAuthenticated(true); 
         navigate("/oem"); 
       }
     } catch (error) {
