@@ -78,13 +78,35 @@ MarketplaceInventoryRouter.post("/create", async (req, res) => {
 
 MarketplaceInventoryRouter.delete("/delete/:id", async (req, res) => {
   const ID = req.params.id;
+  console.log("Attempting to delete item with ID:", ID);
+  
   try {
-    await MarketplaceInventoryModel.findByIdAndDelete({ _id: ID });
-    res.send(`Note with ID ${ID} Deleted`);
+    const result = await MarketplaceInventoryModel.findByIdAndDelete(ID);
+    
+    if (result) {
+      console.log("Deleted successfully");
+      res.send(`Note with ID ${ID} deleted`);
+    } else {
+      console.log("Item not found");
+      res.status(404).send(`Item with ID ${ID} not found`);
+    }
   } catch (err) {
-    console.log({ msg: "Error Occured", error: err });
+    console.log({ msg: "Error occurred", error: err });
+    res.status(500).send("Server Error");
   }
 });
+
+// MarketplaceInventoryRouter.delete("/delete/:id", async (req, res) => {
+//   const ID = req.params.id;
+//   console.log("Deleted");
+//   try {
+//     await MarketplaceInventoryModel.findByIdAndDelete({ _id: ID });
+//     console.log("Deleted");
+//     res.send(`Note with ID ${ID} Deleted`);
+//   } catch (err) {
+//     console.log({ msg: "Error Occured", error: err });
+//   }
+// });
 
 // update in specific dealer's Inventory
 MarketplaceInventoryRouter.patch("/update/:id", async (req, res) => {

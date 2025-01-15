@@ -8,10 +8,10 @@ const marketplaceInventorySchema = mongoose.Schema({
   kmsOnOdometer: { type: Number }, 
   majorScratches: { type: Boolean, default: false }, 
   originalPaint: { type: Boolean, default: true },  
-  accidentsReported: { type: Number, default: 0 }, 
-  previousBuyers: { type: Number, default: 0 }, 
+  accidentsReported: { type:String,  }, 
+  previousBuyers: { type:String,}, 
   registrationPlace: { type: String }, 
-  currentPrice: { type: Number, default: 0 }, 
+  currentPrice: { type:String}, 
   dealer: { type: mongoose.Schema.Types.ObjectId, ref: 'Dealer' }, 
   oemSpecs: { type: mongoose.Schema.Types.ObjectId, ref: 'OEMSpecs' }
 },{versionKey:false});
