@@ -1,6 +1,5 @@
 
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Flex,
@@ -25,48 +24,68 @@ export default function Authentication({ setIsAuthenticated }) {
     password: "",
   });
   const [user, setUser] = useState(null); // State to track logged-in user
+  const navigate = useNavigate();
 
   const toggleMode = () => {
     setIsSignup(!isSignup);
   };
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    // Check if user is already authenticated
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+      setIsAuthenticated(true);
+      navigate("/oem");
+    }
+  }, [setIsAuthenticated, navigate]);
 
+  
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
   
     try {
+      let response;
       if (isSignup) {
-        const response = await axios.post("http://localhost:8082/register", formData);
-        console.log(response.data); // Inspect response
+        response = await axios.post("https://attryb-7m01.onrender.com/register", formData);
         alert("Registration successful! Please log in.");
-        setIsSignup(false);
-        setIsAuthenticated(true); 
+        setIsSignup(false); // Switch to login mode after successful registration
       } else {
-        const response = await axios.post("http://localhost:8082/login", formData);
-        console.log(response.data); // Inspect response
-        const username = response.data.name; // Assuming the server sends the user's name
-        setUser(username); // Save user data to state
-        setIsAuthenticated(true);
-        navigate("/oem");
+        response = await axios.post("https://attryb-7m01.onrender.com/login", formData);
+  
+
+        console.log(response.data);
+  
+      
+        if (response.data.msg === "User Does Not Exist") {
+          alert("User not found. Please register first.");
+          return; // Stop the login process if the user doesn't exist
+        } else if (response.data.msg === "Password Is Incorrect") {
+          alert("Incorrect password. Please try again.");
+          return;
+        }
+  
+        const username = response.data.name; 
+        localStorage.setItem("user", JSON.stringify(response.data)); 
+        setUser(username); 
+        setIsAuthenticated(true); 
+        navigate("/oem"); 
       }
     } catch (error) {
       console.error(error);
       alert("An error occurred. Please try again.");
     }
   
+   
     setFormData({ name: "", email: "", password: "" });
   };
+  
 
-  const handleLogout = () => {
-    setUser(null); // Clear the user state
-    setIsAuthenticated(false); // Update the authentication state
-    navigate("/"); // Navigate to the homepage
-  };
+  
 
   return (
     <>
-      <Navbar user={user} onLogout={handleLogout} /> {/* Show Navbar if user is logged in */}
 
       <Flex
         minH={"100vh"}

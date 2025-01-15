@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
 
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Modal,
@@ -11,11 +11,13 @@ import {
   ModalCloseButton,
   useDisclosure,
   Input,
+  useToast,
 } from "@chakra-ui/react";
-import Navbar from '../components/Navbar';
+import Navbar from "../components/Navbar";
 import axios from "axios";
 
-const MarketPlace = ({ user}) => {
+const MarketPlace = () => {
+  
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [data, setData] = useState([]);
   const [editItemId, setEditItemId] = useState(null);
@@ -33,9 +35,11 @@ const MarketPlace = ({ user}) => {
     oemSpecs: "",
   });
 
+  const toast = useToast(); // Creating the toast instance for snackbar
+
   const fetchData = () => {
     axios
-      .get("http://localhost:8082/MarketplaceInventory")
+      .get("https://attryb-7m01.onrender.com/MarketplaceInventory")
       .then((response) => {
         setData(response.data);
       })
@@ -49,6 +53,17 @@ const MarketPlace = ({ user}) => {
   }, []);
 
   const handleEdit = (id) => {
+    if (!user) {
+      toast({
+        title: "Please login to update data.",
+        description: "You need to be logged in to update or delete data.",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
+
     const itemToEdit = data.find((item) => item._id === id);
 
     if (itemToEdit) {
@@ -84,49 +99,108 @@ const MarketPlace = ({ user}) => {
       [name]: parsedValue,
     });
   };
+  
+  let user=localStorage.getItem("user");
+  console.log("user",user)
 
   const handleUpdate = () => {
-    // Create an updated data object with the edited values
-    const updatedData = {
-      ...formData,
-    };
+    if (!user) {
+      toast({
+        title: "Please login to update data.",
+        description: "You need to be logged in to update data.",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    const updatedData = { ...formData };
 
     axios
       .patch(
-        `http://localhost:8082/MarketplaceInventory/update/${editItemId}`,
+        `https://attryb-7m01.onrender.com/MarketplaceInventory/update/${editItemId}`,
         updatedData
       )
       .then((response) => {
         console.log("Data updated successfully:", response.data);
-        // Refresh data from the server
         fetchData();
         handleCloseModal();
+        toast({
+          title: "Data updated successfully.",
+          description: "The car data has been updated.",
+          status: "success",
+          duration: 4000,
+          isClosable: true,
+        });
       })
       .catch((error) => {
         console.error("Error updating data:", error);
-        // Handle errors here
+        toast({
+          title: "Error updating data.",
+          description: "There was an error while updating the data.",
+          status: "error",
+          duration: 4000,
+          isClosable: true,
+        });
       });
   };
 
   const handleDelete = (id) => {
-    axios
-      .patch(
-        `http://localhost:8082/MarketplaceInventory/update/${id}`
-      )
+    if (!user) {
+      toast({
+        title: "Please login to delete data.",
+        description: "You need to be logged in to delete data.",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    fetch(`https://attryb-7m01.onrender.com/MarketplaceInventory/delete/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => {
-        console.log("Data deleted successfully");
-        // Refresh data from the server
-        fetchData();
+        if (response.ok) {
+          console.log("Data deleted successfully");
+          fetchData();
+          toast({
+            title: "Data deleted successfully.",
+            description: "The car data has been deleted.",
+            status: "success",
+            duration: 4000,
+            isClosable: true,
+          });
+        } else {
+          console.error("Failed to delete the data");
+          toast({
+            title: "Error deleting data.",
+            description: "There was an error while deleting the data.",
+            status: "error",
+            duration: 4000,
+            isClosable: true,
+          });
+        }
       })
       .catch((error) => {
-        console.error("Error deleted data:", error);
-        // Handle errors here
+        console.error("Error deleting data:", error);
+        toast({
+          title: "Error deleting data.",
+          description: "There was an error while deleting the data.",
+          status: "error",
+          duration: 4000,
+          isClosable: true,
+        });
       });
   };
 
   return (
     <>
-  <Navbar user={user} />
+      <Navbar  />
       {data.map((el) => (
         <div key={el._id}>
           <div
@@ -158,48 +232,24 @@ const MarketPlace = ({ user}) => {
                 padding: "20px",
               }}
             >
-              <p>Title:{el.title}</p>
-              <p
-                style={{
-                  marginTop: "8px",
-                }}
-              >
+              <p>Title: {el.title}</p>
+              <p style={{ marginTop: "8px" }}>
                 kms on odometer: {el.kmsOnOdometer}
               </p>
-              <p
-                style={{
-                  marginTop: "8px",
-                }}
-              >
-                MajorScratches : {el.majorScratches}
+              <p style={{ marginTop: "8px" }}>
+                Major Scratches: {el.majorScratches ? "Yes" : "No"}
               </p>
-              <p
-                style={{
-                  marginTop: "8px",
-                }}
-              >
-                OriginalPaint : {el.originalPaint}
+              <p style={{ marginTop: "8px" }}>
+                Original Paint: {el.originalPaint ? "Yes" : "No"}
               </p>
-              <p
-                style={{
-                  marginTop: "8px",
-                }}
-              >
-                PreviousBuyers : {el.accidentsReported}
+              <p style={{ marginTop: "8px" }}>
+                Accidents Reported: {el.accidentsReported}
               </p>
-              <p
-                style={{
-                  marginTop: "8px",
-                }}
-              >
-                RegistrationPlace :{el.registrationPlace}{" "}
+              <p style={{ marginTop: "8px" }}>
+                Registration Place: {el.registrationPlace}
               </p>
-              <p
-                style={{
-                  marginTop: "8px",
-                }}
-              >
-                CurrentPrice :{el.currentPrice}{" "}
+              <p style={{ marginTop: "8px" }}>
+                Current Price: {el.currentPrice}
               </p>
               <Button
                 style={{
@@ -227,6 +277,7 @@ const MarketPlace = ({ user}) => {
                 Delete
               </Button>
             </div>
+
             <div
               style={{
                 border: "1px solid black",
@@ -236,51 +287,22 @@ const MarketPlace = ({ user}) => {
                 padding: "20px",
               }}
             >
-              <p
-                style={{
-                  marginTop: "8px",
-                }}
-              >
-                Description
+              <p style={{ marginTop: "8px" }}>
+                Description:{" "}
+                {el.description && Array.isArray(el.description)
+                  ? el.description[0]
+                  : "No description available"}
               </p>
-              <p
-                style={{
-                  marginTop: "8px",
-                }}
-              >
-                Mileage: {el.oemSpecs.mileage}
+              <p style={{ marginTop: "8px" }}>Mileage: {el.oemSpecs.mileage}</p>
+              <p style={{ marginTop: "8px" }}>Power: {el.oemSpecs.power}</p>
+              <p style={{ marginTop: "8px" }}>
+                Max Speed: {el.oemSpecs.maxSpeed}
               </p>
-              <p
-                style={{
-                  marginTop: "8px",
-                }}
-              >
-                Power: {el.oemSpecs.power}
-              </p>
-              <p
-                style={{
-                  marginTop: "8px",
-                }}
-              >
-                Power :{el.oemSpecs.power}
-              </p>
-              <p
-                style={{
-                  marginTop: "8px",
-                }}
-              >
-                Max speed :{el.oemSpecs.maxSpeed}
-              </p>
-              <p
-                style={{
-                  marginTop: "8px",
-                }}
-              >
-                List price: {el.oemSpecs.listPrice}{" "}
+              <p style={{ marginTop: "8px" }}>
+                List Price: {el.oemSpecs.listPrice}
               </p>
             </div>
           </div>
-          {/* <Button onClick={() => handleEdit(el._id)}>Edit</Button> */}
         </div>
       ))}
 
@@ -299,6 +321,7 @@ const MarketPlace = ({ user}) => {
               value={formData.image}
               onChange={handleChange}
             />
+           
             <Input
               border={"1px solid black"}
               marginTop={"10px"}
@@ -321,7 +344,7 @@ const MarketPlace = ({ user}) => {
               border={"1px solid black"}
               marginTop={"10px"}
               placeholder="Accidents Reported"
-              type="xt"
+              type="number"
               name="accidentsReported"
               value={formData.accidentsReported}
               onChange={handleChange}
@@ -348,12 +371,11 @@ const MarketPlace = ({ user}) => {
               border={"1px solid black"}
               marginTop={"10px"}
               placeholder="Description"
-              type="number"
+              type="text"
               name="description"
               value={formData.description}
               onChange={handleChange}
             />
-
             <Input
               border={"1px solid black"}
               marginTop={"10px"}
@@ -363,20 +385,19 @@ const MarketPlace = ({ user}) => {
               value={formData.currentPrice}
               onChange={handleChange}
             />
-
             <Input
               border={"1px solid black"}
               marginTop={"10px"}
               placeholder="Major Scratch"
               type="text"
-              name=" majorScratches"
+              name="majorScratches"
               value={formData.majorScratches}
               onChange={handleChange}
             />
             <Input
               border={"1px solid black"}
               marginTop={"10px"}
-              placeholder="Original paint"
+              placeholder="Original Paint"
               type="text"
               name="originalPaint"
               value={formData.originalPaint}
@@ -385,16 +406,11 @@ const MarketPlace = ({ user}) => {
           </ModalBody>
 
           <ModalFooter>
-            <Button
-              colorScheme="blue"
-              mr={3}
-              // onClick={() => {
-              // Add your update logic here
-              // console.log("Updating data:", formData);
-              onClick={handleUpdate}
-              // }}
-            >
+            <Button colorScheme="blue" mr={3} onClick={handleUpdate}>
               Update Data
+            </Button>
+            <Button variant="ghost" onClick={handleCloseModal}>
+              Close
             </Button>
           </ModalFooter>
         </ModalContent>
