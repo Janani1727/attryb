@@ -1,4 +1,5 @@
 
+
 import { Button, Text } from "@chakra-ui/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
@@ -12,7 +13,6 @@ import {
   ModalCloseButton,
   useDisclosure,
   Input,
-  useToast,
 } from "@chakra-ui/react";
 import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +26,7 @@ const Oem = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [searchResults, setSearchResults] = useState([]);
- const toast = useToast();
+
   const [formData, setFormData] = useState({
     image: "",
     title: "",
@@ -72,20 +72,8 @@ const Oem = () => {
       setSearchResults(filteredResults);
     }
   }, [searchQuery, oem]);
-  let user=localStorage.getItem("user");
-  console.log("user",user)
-  const PostData = (oemId) => {
-    if (!user) {
-      toast({
-        title: "Please login to delete data.",
-        description: "You need to be logged in to delete data.",
-        status: "warning",
-        duration: 4000,
-        isClosable: true,
-      });
-      return;
-    }
 
+  const PostData = (oemId) => {
     axios
       .post("https://attryb-7m01.onrender.com/MarketplaceInventory/create", {
         ...formData,
@@ -125,359 +113,217 @@ const Oem = () => {
       console.error(error);
     }
   }
+
   return (
-        <>
-          <Navbar />
-          <div>
+    <>
+      <Navbar />
+      <div>
+        <div>
+          <div style={{ display: "flex", marginTop: "20px", marginBottom: "30px" }}>
             <div>
-              <div
-                style={{ display: "flex", marginTop: "20px", marginBottom: "30px" }}
+              <select
+                style={{
+                  border: "1px solid black",
+                  marginLeft: "60px",
+                  width: "200px",
+                  height: "40px",
+                }}
+                onChange={(e) => sortByMileage(e.target.value)}
               >
-                <div>
-                  <select
-                    style={{
-                      border: "1px solid black",
-                      marginLeft: "60px",
-                      width: "200px",
-                      height: "40px",
-                    }}
-                    onChange={(e) => sortByMileage(e.target.value)}
-                  >
-                    <option value="">Sort by Mileage</option>
-                    <option value="asc">Low to High</option>
-                    <option value="desc">High to Low</option>
-                  </select>
-                </div>
-                <div>
-                  <select
-                    style={{
-                      border: "1px solid black",
-                      marginLeft: "60px",
-                      width: "200px",
-                      height: "40px",
-                    }}
-                    onChange={(e) => sortByPrice(e.target.value)}
-                  >
-                    <option value="">Sort By Price</option>
-                    <option value="asc">Low to High</option>
-                    <option value="desc">High to Low</option>
-                  </select>
-                </div>
-                <div>
-                  <select
-                    style={{
-                      border: "1px solid black",
-                      marginLeft: "60px",
-                      width: "200px",
-                      height: "40px",
-                    }}
-                    onChange={(e) => FilterByColor(e.target.value)}
-                  >
-                    <option value="">Filter by color</option>
-                    <option value="black">Black</option>
-                    <option value="white">White</option>
-                    <option value="blue">Blue</option>
-                    <option value="red">Red</option>
-                  </select>
-                </div>
-    
-                <input
+                <option value="">Sort by Mileage</option>
+                <option value="asc">Low to High</option>
+                <option value="desc">High to Low</option>
+              </select>
+            </div>
+            <div>
+              <select
+                style={{
+                  border: "1px solid black",
+                  marginLeft: "60px",
+                  width: "200px",
+                  height: "40px",
+                }}
+                onChange={(e) => sortByPrice(e.target.value)}
+              >
+                <option value="">Sort By Price</option>
+                <option value="asc">Low to High</option>
+                <option value="desc">High to Low</option>
+              </select>
+            </div>
+            <div>
+              <select
+                style={{
+                  border: "1px solid black",
+                  marginLeft: "60px",
+                  width: "200px",
+                  height: "40px",
+                }}
+                onChange={(e) => FilterByColor(e.target.value)}
+              >
+                <option value="">Filter by color</option>
+                <option value="black">Black</option>
+                <option value="white">White</option>
+                <option value="blue">Blue</option>
+                <option value="red">Red</option>
+              </select>
+            </div>
+
+            <input
+              style={{
+                border: "1px solid black",
+                marginLeft: "20px",
+                width: "700px",
+                height: "40px",
+              }}
+              placeholder="search by model name"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "20px",
+            width: "100%",
+            padding: "20px",
+          }}
+        >
+          {Array.isArray(searchResults) && searchResults.length > 0 ? (
+            searchResults.map((el, index) => (
+              <>
+                <div
+                  key={index}
+                  onClick={onOpen}
                   style={{
                     border: "1px solid black",
-                    marginLeft: "20px",
-                    width: "700px",
-                    height: "40px",
+                    padding: "10px",
+                    textAlign: "center",
                   }}
-                  placeholder="search by model name"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-    
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "20px",
-                width: "100%",
-                padding: "20px",
-              }}
-            >
-              {Array.isArray(oem) && oem.length > 0 ? (
-                oem.map((el) => (
-                  <>
-                    <div
-                      key={el._id}
-                      onClick={onOpen}
-                      style={{
-                        border: "1px solid black",
-                        padding: "10px",
-                        textAlign: "center",
-                      }}
-                    >
-                      <Text>{el.model}</Text>
-                      <Text>year: {el.year}</Text>
-                      <Text>list price :{el.listPrice}</Text>
-                      <div style={{ display: "flex", justifyContent: "center" }}>
-                        {el.availableColors.map((color, colorIndex) => (
-                          <div
-                            key={colorIndex}
-                            style={{
-                              width: "20px",
-                              height: "20px",
-                              backgroundColor: color,
-                              marginRight: "5px",
-                            }}
-                          ></div>
-                        ))}
-                      </div>
-                      <Text> Max Speed :{el.maxSpeed}</Text>
-                      <Text>Mileage : {el.mileage}</Text>
-                      <Text>Power: {el.power}</Text>
-                    </div>
-    
-                    <Modal isOpen={isOpen} onClose={onClose}>
-                      <ModalOverlay />
-                      <ModalContent>
-                        <ModalHeader>
-                          Add Your Car with OEM Specifications
-                        </ModalHeader>
-                        <ModalCloseButton />
-                        <ModalBody>
-                          <Input
-                            border={"1px solid black"}
-                            placeholder="Image URL"
-                            type="text"
-                            name="image"
-                            value={formData.image}
-                            onChange={handleChange}
-                          />
-                          <Input
-                            border={"1px solid black"}
-                            marginTop={"10px"}
-                            placeholder="Title"
-                            type="text"
-                            name="title"
-                            value={formData.title}
-                            onChange={handleChange}
-                          />
-                          <Input
-                            border={"1px solid black"}
-                            marginTop={"10px"}
-                            placeholder="Kms on Odometer"
-                            type="number"
-                            name="kmsOnOdometer"
-                            value={formData.kmsOnOdometer}
-                            onChange={handleChange}
-                          />
-                          <Input
-                            border={"1px solid black"}
-                            marginTop={"10px"}
-                            placeholder="Accidents Reported"
-                            type="text"
-                            name="accidentsReported"
-                            value={formData.accidentsReported}
-                            onChange={handleChange}
-                          />
-                          <Input
-                            border={"1px solid black"}
-                            marginTop={"10px"}
-                            placeholder="Previous Buyers"
-                            type="number"
-                            name="previousBuyers"
-                            value={formData.previousBuyers}
-                            onChange={handleChange}
-                          />
-                          <Input
-                            border={"1px solid black"}
-                            marginTop={"10px"}
-                            placeholder="Registration Place"
-                            type="text"
-                            name="registrationPlace"
-                            value={formData.registrationPlace}
-                            onChange={handleChange}
-                          />
-                          <Input
-                            border={"1px solid black"}
-                            marginTop={"10px"}
-                            placeholder="Description"
-                            type="text"
-                            name="description"
-                            value={formData.description} // Ensure it's correctly bound
-                            onChange={handleChange}
-                          />
-                          <Input
-                            border={"1px solid black"}
-                            marginTop={"10px"}
-                            placeholder="Current Price"
-                            type="number"
-                            name="currentPrice"
-                            value={formData.currentPrice}
-                            onChange={handleChange}
-                          />
-                          <Input
-                            border={"1px solid black"}
-                            marginTop={"10px"}
-                            placeholder="Major Scratch"
-                            type="text"
-                            name="majorScratches"
-                            value={formData.majorScratches}
-                            onChange={handleChange}
-                          />
-                          <Input
-                            border={"1px solid black"}
-                            marginTop={"10px"}
-                            placeholder="Original paint"
-                            type="text"
-                            name="originalPaint"
-                            value={formData.originalPaint}
-                            onChange={handleChange}
-                          />
-                        </ModalBody>
-    
-                        <ModalFooter>
-                          <Button
-                            colorScheme="blue"
-                            mr={3}
-                            onClick={() => PostData(el._id)}
-                          >
-                            Add Data
-                          </Button>
-                        </ModalFooter>
-                      </ModalContent>
-                    </Modal>
-                  </>
-                ))
-              ) : (
-                <div>Loading...</div>
-              )}
-            </div>
-    
-            {/* Modal for adding new data */}
-          </div>
-        </>
-      );
-  // return (
-  //   <>
-  //     <Navbar />
-  //     <div>
-  //       <div>
-  //         <div
-  //           style={{ display: "flex", marginTop: "20px", marginBottom: "30px" }}
-  //         >
-  //           <div>
-  //             <select
-  //               style={{
-  //                 border: "1px solid black",
-  //                 marginLeft: "60px",
-  //                 width: "200px",
-  //                 height: "40px",
-  //               }}
-  //               onChange={(e) => sortByMileage(e.target.value)}
-  //             >
-  //               <option value="">Sort by Mileage</option>
-  //               <option value="asc">Low to High</option>
-  //               <option value="desc">High to Low</option>
-  //             </select>
-  //           </div>
-  //           <div>
-  //             <select
-  //               style={{
-  //                 border: "1px solid black",
-  //                 marginLeft: "60px",
-  //                 width: "200px",
-  //                 height: "40px",
-  //               }}
-  //               onChange={(e) => sortByPrice(e.target.value)}
-  //             >
-  //               <option value="">Sort By Price</option>
-  //               <option value="asc">Low to High</option>
-  //               <option value="desc">High to Low</option>
-  //             </select>
-  //           </div>
-  //           <div>
-  //             <select
-  //               style={{
-  //                 border: "1px solid black",
-  //                 marginLeft: "60px",
-  //                 width: "200px",
-  //                 height: "40px",
-  //               }}
-  //               onChange={(e) => FilterByColor(e.target.value)}
-  //             >
-  //               <option value="">Filter by color</option>
-  //               <option value="black">Black</option>
-  //               <option value="white">White</option>
-  //               <option value="blue">Blue</option>
-  //               <option value="red">Red</option>
-  //             </select>
-  //           </div>
+                >
+                  <Text>{el.model}</Text>
+                  <Text>year: {el.year}</Text>
+                  <Text>list price :{el.listPrice}</Text>
+                  <div style={{ display: "flex", justifyContent: "center" }}>
+                    {el.availableColors.map((color, colorIndex) => (
+                      <div
+                        key={colorIndex}
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          backgroundColor: color,
+                          marginRight: "5px",
+                        }}
+                      ></div>
+                    ))}
+                  </div>
+                  <Text> Max Speed :{el.maxSpeed}</Text>
+                  <Text>Mileage : {el.mileage}</Text>
+                  <Text>Power: {el.power}</Text>
+                </div>
 
-  //           <input
-  //             style={{
-  //               border: "1px solid black",
-  //               marginLeft: "20px",
-  //               width: "700px",
-  //               height: "40px",
-  //             }}
-  //             placeholder="search by model name"
-  //             value={searchQuery}
-  //             onChange={(e) => setSearchQuery(e.target.value)}
-  //           />
-  //         </div>
-  //       </div>
+                <Modal isOpen={isOpen} onClose={onClose}>
+                  <ModalOverlay />
+                  <ModalContent>
+                    <ModalHeader>
+                      Add Your Car with OEM Specifications
+                    </ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                      <Input
+                        border={"1px solid black"}
+                        placeholder="Image URL"
+                        type="text"
+                        name="image"
+                        value={formData.image}
+                        onChange={handleChange}
+                      />
+                      <Input
+                        border={"1px solid black"}
+                        marginTop={"10px"}
+                        placeholder="Title"
+                        type="text"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                      />
+                      <Input
+                        border={"1px solid black"}
+                        marginTop={"10px"}
+                        placeholder="Kms on Odometer"
+                        type="number"
+                        name="kmsOnOdometer"
+                        value={formData.kmsOnOdometer}
+                        onChange={handleChange}
+                      />
+                      <Input
+                        border={"1px solid black"}
+                        marginTop={"10px"}
+                        placeholder="Accidents Reported"
+                        type="text"
+                        name="accidentsReported"
+                        value={formData.accidentsReported}
+                        onChange={handleChange}
+                      />
+                      <Input
+                        border={"1px solid black"}
+                        marginTop={"10px"}
+                        placeholder="Previous Buyers"
+                        type="number"
+                        name="previousBuyers"
+                        value={formData.previousBuyers}
+                        onChange={handleChange}
+                      />
+                      <Input
+                        border={"1px solid black"}
+                        marginTop={"10px"}
+                        placeholder="Registration Place"
+                        type="text"
+                        name="registrationPlace"
+                        value={formData.registrationPlace}
+                        onChange={handleChange}
+                      />
+                      <Input
+                        border={"1px solid black"}
+                        marginTop={"10px"}
+                        placeholder="Description"
+                        type="text"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                      />
+                      <Input
+                        border={"1px solid black"}
+                        marginTop={"10px"}
+                        placeholder="Current Price"
+                        type="number"
+                        name="currentPrice"
+                        value={formData.currentPrice}
+                        onChange={handleChange}
+                      />
+                    </ModalBody>
 
-  //       <div
-  //         style={{
-  //           display: "grid",
-  //           gridTemplateColumns: "repeat(3, 1fr)",
-  //           gap: "20px",
-  //           width: "100%",
-  //           padding: "20px",
-  //         }}
-  //       >
-  //         {Array.isArray(searchResults) && searchResults.length > 0 ? (
-  //           searchResults.map((el, index) => (
-  //             <div
-  //               key={index}
-  //               onClick={onOpen}
-  //               style={{
-  //                 border: "1px solid black",
-  //                 padding: "10px",
-  //                 textAlign: "center",
-  //               }}
-  //             >
-  //               <Text>{el.model}</Text>
-  //               <Text>year: {el.year}</Text>
-  //               <Text>list price :{el.listPrice}</Text>
-  //               <div style={{ display: "flex", justifyContent: "center" }}>
-  //                 {el.availableColors.map((color, colorIndex) => (
-  //                   <div
-  //                     key={colorIndex}
-  //                     style={{
-  //                       width: "20px",
-  //                       height: "20px",
-  //                       backgroundColor: color,
-  //                       marginRight: "5px",
-  //                     }}
-  //                   ></div>
-  //                 ))}
-  //               </div>
-  //               <Text> Max Speed :{el.maxSpeed}</Text>
-  //               <Text>Mileage : {el.mileage}</Text>
-  //               <Text>Power: {el.power}</Text>
-  //             </div>
-  //           ))
-  //         ) : (
-  //           <div>Loading...</div>
-  //         )}
-  //       </div>
-
-  //       {/* Modal for adding new data */}
-  //     </div>
-  //   </>
-  // );
+                    <ModalFooter>
+                      <Button colorScheme="blue" onClick={() => PostData(el._id)}>
+                        Submit
+                      </Button>
+                      <Button variant="ghost" onClick={onClose}>
+                        Close
+                      </Button>
+                    </ModalFooter>
+                  </ModalContent>
+                </Modal>
+              </>
+            ))
+          ) : (
+            <div>No Cars Available</div>
+          )}
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default Oem;
